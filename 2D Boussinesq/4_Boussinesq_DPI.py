@@ -5,9 +5,9 @@ of the Marsigli flow problem governed by the 2D Boussinesq equations
 This correpsonds to Example 2 for the following paper:
     "Multifidelity computing for coupling full and reduced order models",
      PLOS ONE, 2020
-     
+
 For questions, comments, or suggestions, please contact Shady Ahmed,
-PhD candidate, School of Mechanical and Aerospace Engineering, 
+PhD candidate, School of Mechanical and Aerospace Engineering,
 Oklahoma State University. @ shady.ahmed@okstate.edu
 last checked: 11/27/2020
 """
@@ -25,8 +25,8 @@ from numpy import linalg as LA
 def jacobian(nx,ny,dx,dy,q,s):
     gg = 1.0/(4.0*dx*dy)
     hh = 1.0/3.0
-    
-    #Arakawa 1:nx,1:ny   
+
+    #Arakawa 1:nx,1:ny
     j1 = gg*( (q[2:nx+1,1:ny]-q[0:nx-1,1:ny])*(s[1:nx,2:ny+1]-s[1:nx,0:ny-1]) \
              -(q[1:nx,2:ny+1]-q[1:nx,0:ny-1])*(s[2:nx+1,1:ny]-s[0:nx-1,1:ny]))
 
@@ -34,37 +34,35 @@ def jacobian(nx,ny,dx,dy,q,s):
             - q[0:nx-1,1:ny]*(s[0:nx-1,2:ny+1]-s[0:nx-1,0:ny-1]) \
             - q[1:nx,2:ny+1]*(s[2:nx+1,2:ny+1]-s[0:nx-1,2:ny+1]) \
             + q[1:nx,0:ny-1]*(s[2:nx+1,0:ny-1]-s[0:nx-1,0:ny-1]))
-    
+
     j3 = gg*( q[2:nx+1,2:ny+1]*(s[1:nx,2:ny+1]-s[2:nx+1,1:ny]) \
             - q[0:nx-1,0:ny-1]*(s[0:nx-1,1:ny]-s[1:nx,0:ny-1]) \
             - q[0:nx-1,2:ny+1]*(s[1:nx,2:ny+1]-s[0:nx-1,1:ny]) \
             + q[2:nx+1,0:ny-1]*(s[2:nx+1,1:ny]-s[1:nx,0:ny-1]) )
 
     jac = (j1+j2+j3)*hh
-    
+
     return jac
 
 def laplacian(nx,ny,dx,dy,w):
     aa = 1.0/(dx*dx)
     bb = 1.0/(dy*dy)
-    
+
     lap = aa*(w[2:nx+1,1:ny]-2.0*w[1:nx,1:ny]+w[0:nx-1,1:ny]) \
         + bb*(w[1:nx,2:ny+1]-2.0*w[1:nx,1:ny]+w[1:nx,0:ny-1])
-    return lap    
-
+    return lap
 
 def initial(nx,ny):
     #resting flow
     w = np.zeros([nx+1,ny+1])
     s = np.zeros([nx+1,ny+1])
-    
+
     #masrigli flow [for temperature IC]
     t = np.zeros([nx+1,ny+1])
     t[:int(nx/2)+1,:] = 1.5
     t[int(nx/2)+1:,:] = 1
-    
-    return w,s,t
 
+    return w,s,t
 
 # time integration using third-order Runge Kutta method
 def RK3t(rhs,nx,ny,dx,dy,Re,Pr,Ri,w,s,t,dt):
@@ -73,7 +71,7 @@ def RK3t(rhs,nx,ny,dx,dy,Re,Pr,Ri,w,s,t,dt):
 
     tt = np.zeros([nx+1,ny+1])
     tt = np.copy(t)
-    
+
     #stage-1
     rt = rhs(nx,ny,dx,dy,Re,Pr,Ri,w,s,t)
     tt[1:nx,1:ny] = t[1:nx,1:ny] + dt*rt
@@ -90,17 +88,16 @@ def RK3t(rhs,nx,ny,dx,dy,Re,Pr,Ri,w,s,t,dt):
     t = tbc(t)
     return t
 
-
 def tbc(t):
     t[0,:] = t[1,:]
     t[-1,:] = t[-2,:]
     t[:,0] = t[:,1]
     t[:,-1] = t[:,-2]
-    
+
     return t
 
 def BoussRHS_t(nx,ny,dx,dy,Re,Pr,Ri,w,s,t):
-    
+
     #t-equation
     rt = np.zeros([nx-1,ny-1])
     #laplacian terms
@@ -119,12 +116,12 @@ def velocity(nx,ny,dx,dy,s):
     u = (s[1:nx,2:ny+1] - s[1:nx,0:ny-1])/(2*dy)
     # v = -ds/dx
     u = -(s[2:nx+1,1:ny] - s[0:nx-1,1:ny])/(2*dx)
-    
+
     return u,v
 
 
 def import_data(nx,ny,n):
-    folder = 'data_'+ str(nx) + '_' + str(ny)              
+    folder = 'data_'+ str(nx) + '_' + str(ny)
     filename = './Results/'+folder+'/data_' + str(int(n))+'.npz'
     data = np.load(filename)
     w = data['w']
@@ -137,24 +134,24 @@ def PODproj_svd(u,Phi): #Projection
     a = np.dot(u.T,Phi)  # u = Phi * a.T
     return a
 
-def PODrec_svd(a,Phi): #Reconstruction    
-    u = np.dot(Phi,a.T)    
+def PODrec_svd(a,Phi): #Reconstruction
+    u = np.dot(Phi,a.T)
     return u
 
 ############################ GP Routines #####################################
 # Galerkin Projection
 # Right Handside of Galerkin Projection
-def GROMrhs(nr, b_c, b_lw, b_lt, b_nl, a,b): 
+def GROMrhs(nr, b_c, b_lw, b_lt, b_nl, a,b):
     r1, r2, r3 = [np.zeros(nr) for _ in range(3)]
-    
+
     r1 = b_c
-    
+
     a = a.ravel()
     b = b.ravel()
 
     for k in range(nr):
-        r2[k] = np.sum(b_lw[:,k]*a) + np.sum(b_lt[:,k]*b) 
-    
+        r2[k] = np.sum(b_lw[:,k]*a) + np.sum(b_lt[:,k]*b)
+
     for k in range(nr):
         for i in range(nr):
             r3[k] = r3[k] + np.sum(b_nl[i,:,k]*a)*a[i]
@@ -166,30 +163,30 @@ def GROMrhs(nr, b_c, b_lw, b_lt, b_nl, a,b):
 def M(nr, rhs, b_c, b_lw,b_lt, b_nl, a,b, dt):
     c1 = 1.0/3.0
     c2 = 2.0/3.0
-    
+
     #stage-1
     r = rhs(nr, b_c, b_lw, b_lt, b_nl, a,b)
     a0 = a + dt*r
-    
+
     #stage-2
     r = rhs(nr, b_c, b_lw, b_lt, b_nl, a0,b)
     a0 = 0.75*a + 0.25*a0 + 0.25*dt*r
-    
+
     #stage-3
     r = rhs(nr, b_c, b_lw, b_lt, b_nl, a0,b)
     a = c1*a + c2*a0 + c2*dt*r
-    
-    return a   
-            
+
+    return a
+
 
 def export_data_DPI(nx,ny,n,w,s,t):
-    folder = 'data_'+ str(nx) + '_' + str(ny)       
+    folder = 'data_'+ str(nx) + '_' + str(ny)
     if not os.path.exists('./DPI/'+folder):
         os.makedirs('./DPI/'+folder)
-        
+
     filename = './DPI/'+folder+'/data_' + str(int(n))+'.npz'
     np.savez(filename,w=w,s=s,t=t)
-    
+
 #%% Main program
 # Inputs
 lx = 8
@@ -218,15 +215,15 @@ X, Y = np.meshgrid(x, y, indexing='ij')
 
 #%% Load POD data
 
-folder = 'data_'+ str(nx) + '_' + str(ny)       
+folder = 'data_'+ str(nx) + '_' + str(ny)
 filename = './POD/'+folder+'/POD_data.npz'
 data = np.load(filename)
 
-wm = data['wm']        
+wm = data['wm']
 Phiw = data['Phiw']
-sm = data['sm']        
+sm = data['sm']
 Phis = data['Phis']
-tm = data['tm']        
+tm = data['tm']
 Phit = data['Phit']
 aTrue = data['aTrue']
 bTrue = data['bTrue']
@@ -240,9 +237,9 @@ aTrue = aTrue[:,:nr]
 bTrue = bTrue[:,:nr]
 
 #%% Load GP coefficients for w-equation
-folder = 'data_'+ str(nx) + '_' + str(ny)       
+folder = 'data_'+ str(nx) + '_' + str(ny)
 filename = './POD/'+folder+'/GP_data_nr='+str(nr)+'.npz'
-data = np.load(filename) 
+data = np.load(filename)
 b_c = data['b_c']
 b_lw = data['b_lw']
 b_lt = data['b_lt']
@@ -269,12 +266,12 @@ bDPI[0,:] = PODproj_svd(tmp,Phit)
 time=0
 for i in range(ns):
     time = time+dt
-    
+
     tmp = t.reshape([-1,])-tm
     bDPI[i,:] = PODproj_svd(tmp,Phit)
 
     aDPI[i+1,:] = M(nr, GROMrhs, b_c, b_lw, b_lt, b_nl, aDPI[i,:], bDPI[i,:], dt).ravel()
-        
+
     w = PODrec_svd(aDPI[i+1,:],Phiw) + wm
     s = PODrec_svd(aDPI[i+1,:],Phis) + sm
 
@@ -284,24 +281,24 @@ for i in range(ns):
 
     if (i+1)%freq==0:
         export_data_DPI(nx,ny,nstart+i+1,w,s,t)
-    
+
     u,v = velocity(nx,ny,dx,dy,s)
     umax = np.max(np.abs(u))
     vmax = np.max(np.abs(v))
     cfl = np.max([umax*dt/dx, vmax*dt/dy])
-    
+
     if cfl >= 0.8:
         print('CFL exceeds maximum value')
         break
-    
+
     if (i+1)%200==0:
         print(i+1, " ", time, " ", np.max(w), " ", cfl)
-     
+
 tmp = t.reshape([-1,])-tm
 bDPI[i+1,:] = PODproj_svd(tmp,Phit)
 
 #%% Save DATA
-folder = 'data_'+ str(nx) + '_' + str(ny)       
+folder = 'data_'+ str(nx) + '_' + str(ny)
 filename = './DPI/'+folder+'/DPI_data_nr='+str(nr)+'.npz'
-np.savez(filename,aDPI = aDPI, bDPI = bDPI) 
+np.savez(filename,aDPI = aDPI, bDPI = bDPI)
 
