@@ -11,7 +11,23 @@ PhD candidate, School of Mechanical and Aerospace Engineering,
 Oklahoma State University. @ shady.ahmed@okstate.edu
 last checked: 11/27/2020
 """
-
+# OVERVIEW
+# import
+# define method
+  # jacobian
+  # laplacian
+  # poisson-fst
+  # import-data
+  # pod-svd
+  # PODproj-svd,
+  # PODrec-svd
+# main
+  # input
+  # grid
+  # POD-basis-generation
+  # compute-streamfunc. and basis func.
+  # compute-true-model coefficients
+  # save data
 
 #%% Import libraries
 import numpy as np
@@ -20,8 +36,6 @@ from scipy.fftpack import dst, idst
 from numpy import linalg as LA
 
 #%% Define functions
-
-
 # compute jacobian using arakawa scheme
 # computed at all internal physical domain points (1:nx-1,1:ny-1)
 def jacobian(nx,ny,dx,dy,q,s):
@@ -143,10 +157,10 @@ Pr = 1
 
 Tm = 8
 dt = 5e-4
-nt = np.int(np.round(Tm/dt))
+nt = int(np.round(Tm/dt))
 
 ns = 800
-freq = np.int(nt/ns)
+freq = int(nt/ns)
 
 #%% grid
 

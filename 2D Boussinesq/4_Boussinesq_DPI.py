@@ -191,7 +191,8 @@ def export_data_DPI(nx,ny,n,w,s,t):
 # Inputs
 lx = 8
 ly = 1
-nx = 4096
+#nx = 4096
+nx = 128
 ny = int(nx/8)
 
 Re = 1e4
@@ -263,6 +264,7 @@ aDPI[0,:] = PODproj_svd(tmp,Phiw)
 tmp = t.reshape([-1,])-tm
 bDPI[0,:] = PODproj_svd(tmp,Phit)
 
+#%% time integration
 time=0
 for i in range(ns):
     time = time+dt

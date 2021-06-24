@@ -72,7 +72,8 @@ def import_data_UPI(nx,ny,n):
 # Inputs
 lx = 8
 ly = 1
-nx = 4096
+#nx = 4096
+nx = 128
 ny = int(nx/8)
 
 Re = 1e4
@@ -81,10 +82,10 @@ Pr = 1
 
 Tm = 8
 dt = 5e-4
-nt = np.int(np.round(Tm/dt))
+nt = int(np.round(Tm/dt))
 
 ns = 800
-freq = np.int(nt/ns)
+freq = int(nt/ns)
 
 #%% grid
 
@@ -145,8 +146,8 @@ bUPI = data['bUPI']
 
 #%% configure plots
 mpl.rc('text', usetex=True)
-mpl.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
-mpl.rcParams['text.latex.preamble'] = [r'\boldmath']
+mpl.rcParams['text.latex.preamble']= r"\usepackage{amsmath}"
+mpl.rcParams['text.latex.preamble'] = r'\boldmath'
 font = {'family' : 'normal',
         'weight' : 'bold',
         'size'   : 20}
@@ -197,8 +198,8 @@ w8,s8,t8 = import_data(nx,ny,n)
 
 #%%
 mpl.rc('text', usetex=True)
-mpl.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
-mpl.rcParams['text.latex.preamble'] = [r'\boldmath']
+mpl.rcParams['text.latex.preamble']= r"\usepackage{amsmath}"
+mpl.rcParams['text.latex.preamble'] = r'\boldmath'
 font = {'family' : 'normal',
         'weight' : 'bold',
         'size'   : 20}
@@ -265,8 +266,8 @@ wUPI,sUPI,tUPI = import_data_UPI(nx,ny,n)
 # tUPI = tUPI.reshape([nx+1,ny+1])
 #%%
 mpl.rc('text', usetex=True)
-mpl.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
-mpl.rcParams['text.latex.preamble'] = [r'\boldmath']
+mpl.rcParams['text.latex.preamble']= r"\usepackage{amsmath}"
+mpl.rcParams['text.latex.preamble'] = r'\boldmath'
 font = {'family' : 'normal',
         'weight' : 'bold',
         'size'   : 20}
@@ -314,4 +315,11 @@ CB.ax.get_children()[0].set_linewidths(3.0)
 
 
 plt.savefig('./Plots/BScoupling.png', dpi = 500, bbox_inches = 'tight')
+
+# requirements on system:
+# sudo apt-get install -y cm-super
+
+#??? I got this error what is this font?
+# findfont: Font family ['normal'] not found. Falling back to DejaVu Sans.
+
 

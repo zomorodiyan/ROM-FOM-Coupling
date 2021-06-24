@@ -173,7 +173,8 @@ def export_data(nx,ny,n,w,s,t):
 # Inputs
 lx = 8
 ly = 1
-nx = 4096
+#nx = 4096
+nx = 128
 ny = int(nx/8)
 
 Re = 1e4
