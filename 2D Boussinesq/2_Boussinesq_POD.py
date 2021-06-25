@@ -10,16 +10,18 @@ For questions, comments, or suggestions, please contact Shady Ahmed,
 PhD candidate, School of Mechanical and Aerospace Engineering,
 Oklahoma State University. @ shady.ahmed@okstate.edu
 last checked: 11/27/2020
+
+Edited by Mehrdad (https://github.com/zomorodiyan)
 """
-# OVERVIEW
+#%% OVERVIEW
 # import
 # define method
-  # jacobian
-  # laplacian
-  # poisson-fst
+  # jacobian -arakawa scheme-
+  # laplacian -2nd order centered difference scheme-
+  # poisson-fst ??? I am not sure about the formula
   # import-data
   # pod-svd
-  # PODproj-svd,
+  # PODproj-svd
   # PODrec-svd
 # main
   # input
@@ -57,9 +59,11 @@ def jacobian(nx,ny,dx,dy,q,s):
     jac = (j1+j2+j3)*hh
     return jac
 
+
 def laplacian(nx,ny,dx,dy,w):
     aa = 1.0/(dx*dx)
     bb = 1.0/(dy*dy)
+    # 2nd order centered difference scheme
     lap = aa*(w[2:nx+1,1:ny]-2.0*w[1:nx,1:ny]+w[0:nx-1,1:ny]) \
         + bb*(w[1:nx,2:ny+1]-2.0*w[1:nx,1:ny]+w[1:nx,0:ny-1])
     return lap
@@ -71,18 +75,19 @@ def poisson_fst(nx,ny,dx,dy,w):
     f = np.zeros([nx-1,ny-1])
     f = np.copy(-w[1:nx,1:ny])
 
-    #DST: forward transform
+    #DST: forward Discrete Sine Transform
     ff = np.zeros([nx-1,ny-1])
     ff = dst(f, axis = 1, type = 1)
     ff = dst(ff, axis = 0, type = 1)
 
+    #np.reshape: -1 to an axis will put everything else in that axis
     m = np.linspace(1,nx-1,nx-1).reshape([-1,1])
     n = np.linspace(1,ny-1,ny-1).reshape([1,-1])
 
     alpha = (2.0/(dx*dx))*(np.cos(np.pi*m/nx) - 1.0) + (2.0/(dy*dy))*(np.cos(np.pi*n/ny) - 1.0)
     u1 = ff/alpha
 
-    #IDST: inverse transform
+    #IDST: inverse Discrete Sine Transform
     u = idst(u1, axis = 1, type = 1)
     u = idst(u, axis = 0, type = 1)
     u = u/((2.0*nx)*(2.0*ny))
@@ -183,16 +188,17 @@ wm,Phiw,Lw,RICw , tm,Phit,Lt,RICt  = POD_svd(nx,ny,dx,dy,nstart,nend,nstep,nr)
 #%% Compute Streamfunction mean and basis functions
 # from those of potential vorticity using Poisson equation
 
+# compute psi_mean using the equation 28
 tmp = wm.reshape([nx+1,ny+1])
 tmp = poisson_fst(nx,ny,dx,dy,tmp)
 sm = tmp.reshape([-1,])
 
+# compute phi_psi_k, k in range(nr), using the equation 29
 Phis = np.zeros([(nx+1)*(ny+1),nr])
 for k in range(nr):
     tmp = np.copy(Phiw[:,k]).reshape([nx+1,ny+1])
     tmp = poisson_fst(nx,ny,dx,dy,tmp)
     Phis[:,k] = tmp.reshape([-1,])
-
 
 #%% compute true modal coefficients
 nstart= 0

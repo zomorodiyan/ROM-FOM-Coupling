@@ -10,7 +10,26 @@ For questions, comments, or suggestions, please contact Shady Ahmed,
 PhD candidate, School of Mechanical and Aerospace Engineering,
 Oklahoma State University. @ shady.ahmed@okstate.edu
 last checked: 11/27/2020
+
+Edited by Mehrdad (https://github.com/zomorodiay)
 """
+#%% OVERVIEW
+# import
+# define method
+  # jacobian -arakawa scheme-
+  # laplacian -2nd order centered difference scheme-
+  # initial
+  # time intergration using Runge-Kutta 3rd-order
+  # boundary condition
+  # poisson-fst ??? I am not sure about the formula
+  # Boussinesq Right Hand Side
+  # velocity from streamfuncion
+  # export data
+# main
+  # input
+  # grid
+  # time integration
+  # save data
 
 #%% Import libraries
 import numpy as np
@@ -18,7 +37,6 @@ import os
 from scipy.fftpack import dst, idst
 
 #%% Define functions
-
 # compute jacobian using arakawa scheme
 # computed at all internal physical domain points (1:nx-1,1:ny-1)
 def jacobian(nx,ny,dx,dy,q,s):
@@ -38,6 +56,7 @@ def jacobian(nx,ny,dx,dy,q,s):
             - q[0:nx-1,2:ny+1]*(s[1:nx,2:ny+1]-s[0:nx-1,1:ny]) \
             + q[2:nx+1,0:ny-1]*(s[2:nx+1,1:ny]-s[1:nx,0:ny-1]) )
     jac = (j1+j2+j3)*hh
+
     return jac
 
 def laplacian(nx,ny,dx,dy,w):
@@ -45,6 +64,7 @@ def laplacian(nx,ny,dx,dy,w):
     bb = 1.0/(dy*dy)
     lap = aa*(w[2:nx+1,1:ny]-2.0*w[1:nx,1:ny]+w[0:nx-1,1:ny]) \
         + bb*(w[1:nx,2:ny+1]-2.0*w[1:nx,1:ny]+w[1:nx,0:ny-1])
+
     return lap
 
 
@@ -104,7 +124,6 @@ def tbc(t):
 #Elliptic coupled system solver:
 #For 2D Boussinesq equation:
 def poisson_fst(nx,ny,dx,dy,w):
-
     f = np.zeros([nx-1,ny-1])
     f = np.copy(-w[1:nx,1:ny])
 
@@ -211,8 +230,8 @@ for n in range(1,nt+1):
     u,v = velocity(nx,ny,dx,dy,s)
     umax = np.max(np.abs(u))
     vmax = np.max(np.abs(v))
-    cfl = np.max([umax*dt/dx, vmax*dt/dy])
 
+    cfl = np.max([umax*dt/dx, vmax*dt/dy])
     if cfl >= 0.8:
         print('CFL exceeds maximum value')
         break
