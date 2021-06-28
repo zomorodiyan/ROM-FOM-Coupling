@@ -12,6 +12,34 @@ Oklahoma State University. @ shady.ahmed@okstate.edu
 last checked: 11/27/2020
 """
 
+#%% OVERVIEW
+# import
+# define
+#   create training data lstm
+#   jacobian, laplacian, RK3t, tbc
+#   BoussRHS_t, velocity
+#   import data, PODproj, PODrec
+#   GP_routines
+#       GROMrhs
+#       M
+#       import data
+#       export data
+# main
+#   input
+#   grid
+#   load POD data
+#   Select first nr
+#   Load GP coeffs for w eq
+#   Training
+#   Testing
+#       load dpi data
+#       initialize
+#       save data
+#   Testing
+#       load dpi data
+#       initialize
+#       save data
+
 #%% Import libraries
 import numpy as np
 from numpy.random import seed
