@@ -22,7 +22,6 @@ Edited by Mehrdad (https://github.com/zomorodiyan)
   # import-data
   # pod-svd
   # PODproj-svd
-  # PODrec-svd
 # main
   # input
   # grid
@@ -145,15 +144,16 @@ def PODproj_svd(u,Phi): #Projection
     a = np.dot(u.T,Phi)  # u = Phi * a.T if shape of a is [ns,nr]
     return a
 
-def PODrec_svd(a,Phi): #Reconstruction
-    u = np.dot(Phi,a.T)
-    return u
+#def PODrec_svd(a,Phi): #Reconstruction
+#    u = np.dot(Phi,a.T)
+#    return u
 
 #%% Main program
 # Inputs
 lx = 8
 ly = 1
-nx = 4096
+#nx = 4096
+nx = 128
 ny = int(nx/8)
 
 Re = 1e4
