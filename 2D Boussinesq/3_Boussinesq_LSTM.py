@@ -23,6 +23,7 @@ def create_training_data_lstm(serie, window_size):
     return xtrain , ytrain
 
 #%% Main program
+# Load Data
 nx = 16 # set in file 1*
 ny = int(nx/8) # set in file 1*
 #aTrue.shape[0] = number_of_snapshots = 8 set in file 1* + 1 (the initial condition)
@@ -31,16 +32,16 @@ folder = 'data_'+ str(nx) + '_' + str(ny)
 filename = './POD/'+folder+'/POD_data.npz'
 data = np.load(filename)
 aTrue = data['aTrue']
-#%% Training
+# Make Training Data
 n_states = aTrue.shape[1]
 window_size = 3
 xtrain, ytrain = create_training_data_lstm(serie=aTrue,window_size=window_size)
-#Scaling data
+# Scaling data
 m,n = ytrain.shape # m is number of training samples, n is number of output features
 scalerOut = MinMaxScaler(feature_range=(-1,1))
 scalerOut = scalerOut.fit(ytrain)
 ytrain = scalerOut.transform(ytrain)
-for k in range(lookback):
+for k in range(window_size):
     if k == 0:
         tmp = xtrain[:,k,:]
     else:
