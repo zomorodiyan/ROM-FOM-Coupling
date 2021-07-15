@@ -216,7 +216,7 @@ def export_data_UPI(nx,ny,n,w,s,t):
 lx = 8
 ly = 1
 #nx = 4096
-nx = 128
+nx = 256
 ny = int(nx/8)
 
 Re = 1e4
@@ -256,7 +256,7 @@ bTrue = data['bTrue']
 
 #%% Select the first nr
 nr = 8
-nq = 16
+nq = 8
 Phiw = Phiw[:,:nq]
 Phis = Phis[:,:nq]
 Phit = Phit[:,:nq]

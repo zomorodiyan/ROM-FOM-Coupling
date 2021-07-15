@@ -153,7 +153,7 @@ def PODproj_svd(u,Phi): #Projection
 lx = 8
 ly = 1
 #nx = 4096
-nx = 128
+nx = 1024
 ny = int(nx/8)
 
 Re = 1e4

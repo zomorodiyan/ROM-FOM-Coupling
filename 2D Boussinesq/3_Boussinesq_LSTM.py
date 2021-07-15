@@ -24,60 +24,49 @@ def create_training_data_lstm(serie, window_size):
 
 #%% Main program
 # Load Data
-nx = 16 # set in file 1*
+nx = 128 # set in file 1*
 ny = int(nx/8) # set in file 1*
-#aTrue.shape[0] = number_of_snapshots = 8 set in file 1* + 1 (the initial condition)
-#aTrue.shape[1] = number_of_states(basis) = 5 set in file 1*
 folder = 'data_'+ str(nx) + '_' + str(ny)
 filename = './POD/'+folder+'/POD_data.npz'
 data = np.load(filename)
 aTrue = data['aTrue']
-# Make Training Data
-n_states = aTrue.shape[1]
+bTrue = data['bTrue']
+#print('bTrue: \n', bTrue)
+
+# Scale Data
+data = np.concatenate((aTrue, bTrue), axis=1) # axes 0:snapshots 1:states
+scaler = MinMaxScaler(feature_range=(-1,1))
+scaled_data = scaler.fit_transform(data)
+
+# Training Data X & Y
+serie = scaled_data
+n_states = serie.shape[1]
 window_size = 3
-xtrain, ytrain = create_training_data_lstm(serie=aTrue,window_size=window_size)
-# Scaling data
-m,n = ytrain.shape # m is number of training samples, n is number of output features
-scalerOut = MinMaxScaler(feature_range=(-1,1))
-scalerOut = scalerOut.fit(ytrain)
-ytrain = scalerOut.transform(ytrain)
-for k in range(window_size):
-    if k == 0:
-        tmp = xtrain[:,k,:]
-    else:
-        tmp = np.vstack([tmp,xtrain[:,k,:]])
-scalerIn = MinMaxScaler(feature_range=(-1,1))
-scalerIn = scalerIn.fit(tmp)
-for i in range(m):
-    xtrain[i,:,:] = scalerIn.transform(xtrain[i,:,:])
+xtrain, ytrain = create_training_data_lstm(serie=serie,window_size=window_size)
+
 #Shuffling data
-seed(1) # this line & next ??? what they affect
+seed(1) # this line & next, what will they affect qqq
 tf.random.set_seed(0)
 perm = np.random.permutation(xtrain.shape[0]) # xtarin.shape[0] is (n_snapshots - window_size)
 xtrain = xtrain[perm,:,:]
 ytrain = ytrain[perm,:]
-#Create folder
-if os.path.isdir("./LSTM Model"):
-    print('LSTM models folder already exists')
-else:
-    print('Creating LSTM models folder')
-    os.makedirs("./LSTM Model")
-#Removing old models
-model_name = 'LSTM Model/LSTM_Me_' + str(n_states) + '.h5'
-if os.path.isfile(model_name):
-   os.remove(model_name)
+
+
 #create the LSTM architecture
 model = Sequential()
-model.add(LSTM(20, input_shape=(window_size, n_states), return_sequences=True, activation='tanh'))
-model.add(LSTM(20, input_shape=(window_size, n_states), activation='tanh'))
+model.add(LSTM(30, input_shape=(window_size, n_states), return_sequences=True, activation='tanh'))
+model.add(LSTM(30, input_shape=(window_size, n_states), activation='tanh'))
 model.add(Dense(n_states))
+
 #compile model
 model.compile(loss='mean_squared_error', optimizer='adam', metrics=['mse'])
+
 #run the model
-history = model.fit(xtrain, ytrain, epochs=200, batch_size=64,
-        validation_split=0.20, verbose = 0)
+history = model.fit(xtrain, ytrain, epochs=1000, batch_size=64,
+        validation_split=0.20, verbose=1)
+
 #evaluate the model
-scores = model.evaluate(xtrain, ytrain, verbose=0)
+scores = model.evaluate(xtrain, ytrain, verbose=1)
 print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
 loss = history.history['loss']
 val_loss = history.history['val_loss']
@@ -90,5 +79,17 @@ plt.legend()
 filename = 'LSTM Model/loss_Me_' + str(n_states) + '.png'
 plt.savefig(filename, dpi = 200)
 plt.show()
+
+#Create folder
+if os.path.isdir("./LSTM Model"):
+    print('LSTM models folder already exists')
+else:
+    print('Creating LSTM models folder')
+    os.makedirs("./LSTM Model")
+
+#Removing old models
+model_name = 'LSTM Model/LSTM_Me_' + str(n_states) + '.h5'
+if os.path.isfile(model_name):
+   os.remove(model_name)
 #Save the model
 model.save(model_name)

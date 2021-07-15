@@ -128,7 +128,7 @@ def nonline_term(nr,Phiw,Phis,nx,ny):
 lx = 8
 ly = 1
 #nx = 4096
-nx = 128
+nx = 256
 ny = int(nx/8)
 
 Re = 1e4

@@ -174,11 +174,9 @@ def BoussRHS(nx,ny,dx,dy,Re,Pr,Ri,w,s,t):
 #compute velocity components from streamfunction (internal points)
 def velocity(nx,ny,dx,dy,s):
     u =  np.zeros([nx-1,ny-1])
+    u = (s[1:nx,2:ny+1] - s[1:nx,0:ny-1])/(2*dy) # u = ds/dy
     v =  np.zeros([nx-1,ny-1])
-    # u = ds/dy
-    u = (s[1:nx,2:ny+1] - s[1:nx,0:ny-1])/(2*dy)
-    # v = -ds/dx
-    u = -(s[2:nx+1,1:ny] - s[0:nx-1,1:ny])/(2*dx)
+    v = -(s[2:nx+1,1:ny] - s[0:nx-1,1:ny])/(2*dx) # v = -ds/dx
     return u,v
 
 def export_data(nx,ny,n,w,s,t):
@@ -193,7 +191,7 @@ def export_data(nx,ny,n,w,s,t):
 lx = 8
 ly = 1
 #nx = 4096
-nx = 128
+nx = 1024
 ny = int(nx/8)
 
 Re = 1e4

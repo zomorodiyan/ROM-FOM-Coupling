@@ -240,7 +240,7 @@ def export_data_CPI(nx,ny,n,w,s,t):
 lx = 8
 ly = 1
 #nx = 4096
-nx = 128
+nx = 256
 ny = int(nx/8)
 
 Re = 1e4
